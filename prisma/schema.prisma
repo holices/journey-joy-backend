@@ -27,7 +27,7 @@ model Participant {
   name         String?
   email        String
   is_confirmed Boolean @default(false)
-  id_owner     Boolean @default(false)
+  is_owner     Boolean @default(false)
   trip         Trip    @relation(fields: [trip_id], references: [id])
 
   trip_id String
