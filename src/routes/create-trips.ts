@@ -5,6 +5,8 @@ import z from "zod";
 import { dayjs } from "../lib/dayjs";
 import { getMailClient } from "../lib/mail";
 import { prisma } from "../lib/prisma";
+import { ClientError } from "../errors/client.error";
+import { env } from "../env";
 
 export async function createTrip(app: FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().post('/trips', {
@@ -25,15 +27,15 @@ export async function createTrip(app: FastifyInstance) {
     const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
 
     if (differenceInDays > 90) {
-      throw new Error("A data não pode ser superior a 90 dias");
+      throw new ClientError("A data não pode ser superior a 90 dias");
     }
 
     if (dayjs(starts_at).isBefore(new Date())) {
-      throw new Error('Invalid trip start daaate')
+      throw new ClientError('Invalid trip start daaate')
     }
 
     if (dayjs(ends_at).isBefore(starts_at)) {
-      throw new Error('The end date cannot be earlier than the start date')
+      throw new ClientError('The end date cannot be earlier than the start date')
     }
 
     const trip = await prisma.trip.create({
@@ -62,7 +64,7 @@ export async function createTrip(app: FastifyInstance) {
     const formattedStartDate = dayjs(starts_at).format('LL')
     const formattedEndDate = dayjs(ends_at).format('LL')
 
-    const confirmationLink = `http://localhost:3333/trips/${trip.id}/confirm`
+    const confirmationLink = `${env.API_BASE_URL}/trips/${trip.id}/confirm`
 
     const mail = await getMailClient()
 
